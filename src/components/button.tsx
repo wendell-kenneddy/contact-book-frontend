@@ -6,7 +6,7 @@ interface ButtonProps extends ComponentProps<"button">, VariantProps<typeof butt
 }
 
 const buttonVariants = tv({
-  base: "text-base rounded-lg px-5 font-medium flex items-center justify-center gap-2",
+  base: "text-base rounded-lg px-5 font-medium flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50",
   variants: {
     variant: {
       primary: "bg-teal-300 text-teal-950 hover:bg-teal-400",
