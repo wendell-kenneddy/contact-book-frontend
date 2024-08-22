@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-zinc-950`}>
+      <body className={`${inter.className} bg-gray-950`}>
         <Header />
 
         <div className="mt-4 mx-auto w-[90%] max-w-[720px]">{children}</div>
