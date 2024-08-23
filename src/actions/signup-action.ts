@@ -28,11 +28,12 @@ export async function signupAction(prevState: any, formData: FormData) {
     mode: "cors",
     method: "POST",
     cache: "no-store",
-    credentials: "include",
   });
   const json: { message: string } = await res.json();
 
-  if (!res.ok) return { message: json.message };
+  if (!res.ok) {
+    return { message: json.message };
+  }
 
   const authorizationHeader = res.headers.get("authorization");
   const responseCookies = res.headers.getSetCookie();

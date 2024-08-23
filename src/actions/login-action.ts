@@ -26,7 +26,6 @@ export async function loginAction(prevState: any, formData: FormData) {
     mode: "cors",
     method: "POST",
     cache: "no-store",
-    credentials: "include",
   });
   const json: { message: string } = await res.json();
 
