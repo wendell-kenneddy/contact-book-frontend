@@ -1,4 +1,4 @@
-import { DashboardContextProvider } from "@/contexts/dashboard-context";
+import { Providers } from "@/components/providers";
 import { ReactNode } from "react";
 
 interface DashboardLayoutProps {
@@ -6,5 +6,5 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  return <DashboardContextProvider>{children}</DashboardContextProvider>;
+  return <Providers>{children}</Providers>;
 }
