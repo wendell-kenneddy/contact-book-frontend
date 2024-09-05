@@ -1,29 +1,33 @@
 import { X } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { FormEvent } from "react";
+import { FormEvent, useActionState, useEffect } from "react";
 import { Button } from "./button";
 import { ContactData } from "./contact";
+import { editContactAction } from "@/actions/edit-contact-action";
+import { useDashboard } from "@/hooks/use-dashboard";
 
 interface CreateContactModalProps {
   open: boolean;
   contact: ContactData;
-  closeModalFunction: () => void;
+  onClose: () => void;
 }
 
-export function EditContactModal({ open, contact, closeModalFunction }: CreateContactModalProps) {
-  function getFormData(e: FormEvent) {
-    const data = new FormData(e.target as HTMLFormElement);
-    const name = data.get("name");
-    const email = data.get("email");
-    const phone = data.get("phone");
-    return { name, email, phone };
+export function EditContactModal({ open, contact, onClose }: CreateContactModalProps) {
+  const { pageIndex, updatePageIndex } = useDashboard();
+  const [state, action, pending] = useActionState(editContactAction, { message: "" });
+
+  useEffect(() => {
+    if (state.message == "Contact successfully updated.") {
+      updatePageIndex(pageIndex);
+      onClose();
+    }
+  }, [state]);
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    action(new FormData(e.currentTarget));
   }
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const data = getFormData(e);
-    console.log(data);
-  }
   return (
     <Dialog.Root open={open}>
       <Dialog.Portal>
@@ -40,13 +44,21 @@ export function EditContactModal({ open, contact, closeModalFunction }: CreateCo
             </Dialog.Description>
 
             <Dialog.Close>
-              <button name="Close" onClick={closeModalFunction}>
+              <button name="Close" onClick={onClose} disabled={pending}>
                 <X className="size-4 fill-zinc-100" />
               </button>
             </Dialog.Close>
           </header>
 
           <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+            <input
+              type="hidden"
+              name="contact-id"
+              value={contact.id}
+              className="sr-only"
+              readOnly
+            />
+
             <label htmlFor="name" className="sr-only">
               Contact name
             </label>
@@ -87,12 +99,14 @@ export function EditContactModal({ open, contact, closeModalFunction }: CreateCo
 
             <div className="w-full flex items-center justify-between">
               <Dialog.Close asChild>
-                <Button type="button" onClick={closeModalFunction}>
+                <Button type="button" onClick={onClose} disabled={pending}>
                   Cancel
                 </Button>
               </Dialog.Close>
 
-              <Button type="submit">Save</Button>
+              <Button type="submit" disabled={pending}>
+                Save
+              </Button>
             </div>
           </form>
         </Dialog.Content>
