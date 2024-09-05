@@ -1,14 +1,33 @@
 import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { Button } from "./button";
 import { X } from "@phosphor-icons/react";
+import { FormEvent, useActionState, useEffect } from "react";
+import { deleteContactAction } from "@/actions/delete-contact.action";
+import { useDashboard } from "@/hooks/use-dashboard";
 
 interface DeleteContactDialogProps {
   open: boolean;
+  contactID: string | null;
   onClose: () => void;
-  onDelete: () => void;
 }
 
-export function DeleteContactDialog({ open, onClose, onDelete }: DeleteContactDialogProps) {
+export function DeleteContactDialog({ open, contactID, onClose }: DeleteContactDialogProps) {
+  const { pageIndex, updatePageIndex } = useDashboard();
+  const [state, action, pending] = useActionState(deleteContactAction, { message: "" });
+
+  useEffect(() => {
+    if (state.message == "Contact successfully deleted.") {
+      updatePageIndex(pageIndex);
+      onClose();
+    }
+  }, [state]);
+
+  function handleDelete(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    action(formData);
+  }
+
   return (
     <AlertDialog.Root open={open}>
       <AlertDialog.Portal>
@@ -20,7 +39,7 @@ export function DeleteContactDialog({ open, onClose, onDelete }: DeleteContactDi
               <h2 className="font-bold text-lg">Delete contact</h2>
             </AlertDialog.Title>
 
-            <AlertDialog.Cancel asChild onClick={onClose}>
+            <AlertDialog.Cancel asChild onClick={onClose} disabled={pending}>
               <button name="Close dialog">
                 <X className="size-4 fill-zinc-100" />
               </button>
@@ -34,15 +53,24 @@ export function DeleteContactDialog({ open, onClose, onDelete }: DeleteContactDi
             </p>
           </AlertDialog.Description>
 
-          <div className="w-full flex items-center justify-between">
-            <AlertDialog.Action asChild>
-              <Button onClick={onDelete}>Confirm</Button>
+          <form onSubmit={handleDelete} className="w-full flex items-center justify-between">
+            <input
+              type="text"
+              name="contact-id"
+              value={String(contactID)}
+              hidden
+              className="sr-only"
+              readOnly
+            />
+
+            <AlertDialog.Action asChild disabled={pending}>
+              <Button type="submit">Confirm</Button>
             </AlertDialog.Action>
 
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" onClick={onClose} disabled={pending}>
               Cancel
             </Button>
-          </div>
+          </form>
         </AlertDialog.Content>
       </AlertDialog.Portal>
     </AlertDialog.Root>
