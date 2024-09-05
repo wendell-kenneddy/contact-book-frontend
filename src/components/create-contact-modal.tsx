@@ -1,7 +1,9 @@
 import { X } from "@phosphor-icons/react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { FormEvent } from "react";
+import { FormEvent, useActionState, useEffect } from "react";
 import { Button } from "./button";
+import { createContactAction } from "@/actions/create-contact-action";
+import { useDashboard } from "@/hooks/use-dashboard";
 
 interface CreateContactModalProps {
   open: boolean;
@@ -9,18 +11,22 @@ interface CreateContactModalProps {
 }
 
 export function CreateContactModal({ open, onClose }: CreateContactModalProps) {
-  function getFormData(e: FormEvent) {
-    const data = new FormData(e.target as HTMLFormElement);
-    const name = data.get("name");
-    const email = data.get("email");
-    const phone = data.get("phone");
-    return { name, email, phone };
+  const { updatePageIndex } = useDashboard();
+  const [state, action, pending] = useActionState(createContactAction, { message: "" });
+
+  useEffect(() => {
+    if (state.message == "Contact successfully created.") {
+      updatePageIndex(1);
+      onClose();
+    }
+  }, [state]);
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    action(formData);
   }
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const data = getFormData(e);
-  }
   return (
     <Dialog.Root open={open}>
       <Dialog.Portal>
@@ -36,14 +42,14 @@ export function CreateContactModal({ open, onClose }: CreateContactModalProps) {
               </p>
             </Dialog.Description>
 
-            <Dialog.Close>
-              <button name="Close" onClick={onClose}>
+            <Dialog.Close asChild>
+              <button name="Close" onClick={onClose} disabled={pending}>
                 <X className="size-4 fill-zinc-100" />
               </button>
             </Dialog.Close>
           </header>
 
-          <form onSubmit={handleSubmit} className="w-full flex flex-col items-center gap-4">
+          <form onSubmit={onSubmit} className="w-full flex flex-col items-center gap-4">
             <label htmlFor="name" className="sr-only">
               Contact name
             </label>
@@ -81,12 +87,14 @@ export function CreateContactModal({ open, onClose }: CreateContactModalProps) {
 
             <div className="w-full flex items-center justify-between">
               <Dialog.Close asChild>
-                <Button type="button" onClick={onClose}>
+                <Button type="button" onClick={onClose} disabled={pending}>
                   Cancel
                 </Button>
               </Dialog.Close>
 
-              <Button type="submit">Save</Button>
+              <Button type="submit" disabled={pending}>
+                {pending ? "Saving..." : "Save"}
+              </Button>
             </div>
           </form>
         </Dialog.Content>
