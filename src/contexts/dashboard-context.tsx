@@ -7,9 +7,7 @@ export interface DashboardContextData {
   contacts: ContactData[];
   isFetchingContacts: boolean;
   pageIndex: number;
-  tag: number;
   updatePageIndex: (newIndex: number) => void;
-  incrementTag: () => void;
 }
 
 interface DashboardContextProviderProps {
@@ -22,11 +20,6 @@ export function DashboardContextProvider({ children }: DashboardContextProviderP
   const [contacts, setContacts] = useState<ContactData[]>([]);
   const [isFetchingContacts, setIsFetchingContacts] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
-  const [tag, setTag] = useState(1);
-
-  function incrementTag() {
-    setTag((prev) => prev + 1);
-  }
 
   useEffect(() => {
     setIsFetchingContacts(true);
@@ -42,11 +35,10 @@ export function DashboardContextProvider({ children }: DashboardContextProviderP
       .catch((err) => console.log(err));
 
     setIsFetchingContacts(false);
-  }, [tag, pageIndex]);
+  }, [pageIndex]);
 
   function updatePageIndex(newIndex: number) {
     setPageIndex(newIndex);
-    incrementTag();
   }
 
   return (
@@ -55,9 +47,7 @@ export function DashboardContextProvider({ children }: DashboardContextProviderP
         contacts,
         isFetchingContacts,
         pageIndex,
-        tag,
         updatePageIndex,
-        incrementTag,
       }}
     >
       {children}
